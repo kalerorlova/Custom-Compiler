@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="LexerTests" tests="38" skipped="0" failures="0" errors="0" timestamp="2023-09-09T01:21:05" hostname="SWJ_23SJ" time="0.212">
+  <properties/>
+  <testcase name="testException()" classname="LexerTests" time="0.018"/>
+  <testcase name="[1] Alphabetic, 'c', true" classname="LexerTests" time="0.017"/>
+  <testcase name="[2] Newline Escape, '\n', true" classname="LexerTests" time="0.002"/>
+  <testcase name="[3] Actual Newline Escape, '&#10;', false" classname="LexerTests" time="0.002"/>
+  <testcase name="[4] Tab Escape, '\t', true" classname="LexerTests" time="0.001"/>
+  <testcase name="[5] Invalid Escape, '\e', false" classname="LexerTests" time="0.002"/>
+  <testcase name="[6] Quote, ''', false" classname="LexerTests" time="0.001"/>
+  <testcase name="[7] Double Quote, '&quot;', true" classname="LexerTests" time="0.002"/>
+  <testcase name="[8] Empty, '', false" classname="LexerTests" time="0.004"/>
+  <testcase name="[9] Multiple, 'abc', false" classname="LexerTests" time="0.003"/>
+  <testcase name="[1] Example 1, LET x = 5;, [IDENTIFIER=LET@0, IDENTIFIER=x@4, OPERATOR==@6, INTEGER=5@8, OPERATOR=;@9]" classname="LexerTests" time="0.002"/>
+  <testcase name="[2] Example 2, print(&quot;Hello, World!&quot;);, [IDENTIFIER=print@0, OPERATOR=(@5, STRING=&quot;Hello, World!&quot;@6, OPERATOR=)@21, OPERATOR=;@22]" classname="LexerTests" time="0.003"/>
+  <testcase name="[1] Character, (, true" classname="LexerTests" time="0.001"/>
+  <testcase name="[2] Comparison, &lt;=, true" classname="LexerTests" time="0.0"/>
+  <testcase name="[3] Space,  , false" classname="LexerTests" time="0.002"/>
+  <testcase name="[4] Tab, &#9;, false" classname="LexerTests" time="0.001"/>
+  <testcase name="[1] Integer, 1, false" classname="LexerTests" time="0.001"/>
+  <testcase name="[2] Multiple Digits, 123.456, true" classname="LexerTests" time="0.001"/>
+  <testcase name="[3] Negative Decimal, -1.0, true" classname="LexerTests" time="0.001"/>
+  <testcase name="[4] Trailing Decimal, 1., false" classname="LexerTests" time="0.001"/>
+  <testcase name="[5] Leading Decimal, .5, false" classname="LexerTests" time="0.002"/>
+  <testcase name="[1] Single Digit, 0, true" classname="LexerTests" time="0.001"/>
+  <testcase name="[2] Singed Single Digit, +1, true" classname="LexerTests" time="0.001"/>
+  <testcase name="[3] Decimal, 123.456, false" classname="LexerTests" time="0.001"/>
+  <testcase name="[4] Signed Decimal, -1.0, false" classname="LexerTests" time="0.001"/>
+  <testcase name="[5] Trailing Decimal, 1., false" classname="LexerTests" time="0.003"/>
+  <testcase name="[6] Leading Decimal, .5, false" classname="LexerTests" time="0.0"/>
+  <testcase name="[1] Empty, &quot;&quot;, true" classname="LexerTests" time="0.002"/>
+  <testcase name="[2] Alphabetic, &quot;abc&quot;, true" classname="LexerTests" time="0.001"/>
+  <testcase name="[3] Newline Escape, &quot;Hello,\nWorld&quot;, true" classname="LexerTests" time="0.003"/>
+  <testcase name="[4] Double Quote, &quot;'&quot;, true" classname="LexerTests" time="0.001"/>
+  <testcase name="[5] Double Quote, &quot;&quot;&quot;, false" classname="LexerTests" time="0.001"/>
+  <testcase name="[6] Unterminated, &quot;unterminated, false" classname="LexerTests" time="0.001"/>
+  <testcase name="[7] Invalid Escape, &quot;invalid\escape&quot;, false" classname="LexerTests" time="0.0"/>
+  <testcase name="[1] Alphabetic, getName, true" classname="LexerTests" time="0.001"/>
+  <testcase name="[2] Alphanumeric, thelegend27, true" classname="LexerTests" time="0.001"/>
+  <testcase name="[3] Leading Hyphen, -five, false" classname="LexerTests" time="0.001"/>
+  <testcase name="[4] Leading Digit, 1fish2fish3fishbluefish, false" classname="LexerTests" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
