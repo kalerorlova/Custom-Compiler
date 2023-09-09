@@ -103,7 +103,7 @@ public final class Lexer {
             }
             throw new ParseException("Missing Character", chars.index);
         }
-        if (peek("[^\n\r]")) {
+        if (peek("[^\\n\\r]")) {
             if (match("\\\\")) {    //if explicitly written escape seq
                 lexEscape();
             }
@@ -124,8 +124,7 @@ public final class Lexer {
         if (match("\"\"")) {
             throw new ParseException("Double Quote in the String", chars.index);
         }
-        //while (peek("[^\"\\n\\r]")) {
-        while (peek("[^\"\n\r]")) {
+        while (peek("[^\"\\n\\r]")) {
             if (match("\\\\")) {
                 lexEscape();
             }
