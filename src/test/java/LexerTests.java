@@ -22,6 +22,9 @@ public class LexerTests {
         return Stream.of(
                 Arguments.of("Alphabetic", "getName", true),
                 Arguments.of("Alphanumeric", "thelegend27", true),
+                Arguments.of("Underscore", "under_score", true),
+                Arguments.of("Leading Underscore", "_underscore", true),
+                Arguments.of("Hyphen", "hy-phen", true),
                 Arguments.of("Leading Hyphen", "-five", false),
                 Arguments.of("Leading Digit", "1fish2fish3fishbluefish", false)
         );
@@ -36,11 +39,16 @@ public class LexerTests {
     private static Stream<Arguments> testInteger() {
         return Stream.of(
                 Arguments.of("Single Digit", "0", true),
-                Arguments.of("Singed Single Digit", "+1", true),
+                Arguments.of("Signed Single Digit", "+1", true),
+                Arguments.of("Negative Integer", "-123", true),
+                Arguments.of("Very Large Integer", "9876543210", true),
                 Arguments.of("Decimal", "123.456", false),
                 Arguments.of("Signed Decimal", "-1.0", false),
                 Arguments.of("Trailing Decimal", "1.", false),
-                Arguments.of("Leading Decimal", ".5", false)
+                Arguments.of("Leading Decimal", ".5", false),
+                Arguments.of("Alpha", "one", false),
+                Arguments.of("Incorrect Sign", "~5", false)
+            // optional tests - white space?
         );
     }
 
@@ -54,9 +62,13 @@ public class LexerTests {
         return Stream.of(
                 Arguments.of("Integer", "1", false),
                 Arguments.of("Multiple Digits", "123.456", true),
+                Arguments.of("Positive Decimal", "+1.2340", true),
+                Arguments.of("Negative Decimal", "-1.2340", true),
                 Arguments.of("Negative Decimal", "-1.0", true),
                 Arguments.of("Trailing Decimal", "1.", false),
-                Arguments.of("Leading Decimal", ".5", false)
+                Arguments.of("Leading Decimal", ".5", false),
+                Arguments.of("Hidden Integer", "5.toString()", false)     
+            // optional tests - white space? 
         );
     }
 
@@ -91,10 +103,12 @@ public class LexerTests {
                 Arguments.of("Empty", "\"\"", true),
                 Arguments.of("Alphabetic", "\"abc\"", true),
                 Arguments.of("Newline Escape", "\"Hello,\\nWorld\"", true),
-                Arguments.of("Double Quote", "\"\'\"", true),
+                Arguments.of("Mixed Content", "\"abc ACB 123 !@#\"", true),
+                Arguments.of("Single Quote", "\"\'\"", true),
                 Arguments.of("Double Quote", "\"\"\"", false),
                 Arguments.of("Unterminated", "\"unterminated", false),
-                Arguments.of("Invalid Escape", "\"invalid\\escape\"", false)
+                Arguments.of("Invalid Escape", "\"invalid\\escape\"", false),
+                Arguments.of("Mixed Escape", "\"mix of \b \$ escapes\"", false)
         );
     }
 
@@ -109,6 +123,10 @@ public class LexerTests {
         return Stream.of(
                 Arguments.of("Character", "(", true),
                 Arguments.of("Comparison", "<=", true),
+                Arguments.of("Comparison Greater Eq", ">=", true),
+                Arguments.of("Comparison Not Eq", "!=", true),
+                Arguments.of("Comparison Eq", "==", true),
+                Arguments.of("Set To", "=", true),
                 Arguments.of("Space", " ", false),
                 Arguments.of("Tab", "\t", false)
         );
