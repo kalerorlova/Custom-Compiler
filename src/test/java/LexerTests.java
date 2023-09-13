@@ -1,4 +1,4 @@
-//package plc.project;
+package plc.project;//package plc.project;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -26,8 +26,11 @@ public class LexerTests {
                 Arguments.of("Leading Underscore", "_underscore", true),
                 Arguments.of("Hyphen", "hy-phen", true),
                 Arguments.of("Leading Hyphen", "-five", false),
-                Arguments.of("Leading Digit", "1fish2fish3fishbluefish", false)
-        );
+                Arguments.of("Leading Digit", "1fish2fish3fishbluefish", false),
+                Arguments.of("Single Character", "a", true),
+                Arguments.of("Hyphenated", "a-b-c", true),
+                Arguments.of("Underscores", "___", true)
+                );
     }
 
     @ParameterizedTest
@@ -40,6 +43,7 @@ public class LexerTests {
         return Stream.of(
                 Arguments.of("Single Digit", "0", true),
                 Arguments.of("Signed Single Digit", "+1", true),
+                Arguments.of("Signed Integer", "+123", true),
                 Arguments.of("Negative Integer", "-123", true),
                 Arguments.of("Very Large Integer", "9876543210", true),
                 Arguments.of("Decimal", "123.456", false),
@@ -47,8 +51,9 @@ public class LexerTests {
                 Arguments.of("Trailing Decimal", "1.", false),
                 Arguments.of("Leading Decimal", ".5", false),
                 Arguments.of("Alpha", "one", false),
-                Arguments.of("Incorrect Sign", "~5", false)
-            // optional tests - white space?
+                Arguments.of("Incorrect Sign", "~5", false),
+                Arguments.of("Leading Zeros", "007", false),
+                Arguments.of("Leading White Space", "  1", false)
         );
     }
 
@@ -67,8 +72,10 @@ public class LexerTests {
                 Arguments.of("Negative Decimal", "-1.0", true),
                 Arguments.of("Trailing Decimal", "1.", false),
                 Arguments.of("Leading Decimal", ".5", false),
-                Arguments.of("Hidden Integer", "5.toString()", false)     
-            // optional tests - white space? 
+                Arguments.of("Hidden Integer", "5.toString()", false),
+                Arguments.of("Leading Zeros", "007.0", false),
+                Arguments.of("Double Decimal", "1..0", false),
+                Arguments.of("Leading White Space", "  1.0", false)
         );
     }
 
@@ -108,8 +115,12 @@ public class LexerTests {
                 Arguments.of("Double Quote", "\"\"\"", false),
                 Arguments.of("Unterminated", "\"unterminated", false),
                 Arguments.of("Invalid Escape", "\"invalid\\escape\"", false),
-                Arguments.of("Mixed Escape", "\"mix of \b \$ escapes\"", false)
-        );
+                Arguments.of("Mixed Escape", "\"mix of \\b \\$ escapes\"", false),
+                Arguments.of("Multiple Spaces", "one       two", true),
+                Arguments.of("Mixed Escape", "\"mix of \\b \\$ escapes\"", false),
+                Arguments.of("Mixed Escape", "\"mix of \\b \\$ escapes\"", false)
+
+                );
     }
 
     @ParameterizedTest
@@ -160,9 +171,10 @@ public class LexerTests {
     @Test
     void testException() {
         ParseException exception = Assertions.assertThrows(ParseException.class,
-                () -> new Lexer("\"unterminated").lex());
-        Assertions.assertEquals(13, exception.getIndex());
+                () -> new Lexer("\\\"invalid\\\\escape\\").lex());
+        Assertions.assertEquals(10, exception.getIndex());
     }
+
 
     /**
      * Tests that lexing the input through {@link Lexer#lexToken()} produces a
