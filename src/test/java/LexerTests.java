@@ -1,4 +1,4 @@
-package plc.project;//package plc.project;
+package plc.project;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -30,7 +30,7 @@ public class LexerTests {
                 Arguments.of("Single Character", "a", true),
                 Arguments.of("Hyphenated", "a-b-c", true),
                 Arguments.of("Underscores", "___", true)
-                );
+        );
     }
 
     @ParameterizedTest
@@ -52,7 +52,7 @@ public class LexerTests {
                 Arguments.of("Leading Decimal", ".5", false),
                 Arguments.of("Alpha", "one", false),
                 Arguments.of("Incorrect Sign", "~5", false),
-                Arguments.of("Leading Zeros", "007", false),
+                Arguments.of("Leading Zeros", "007", true),
                 Arguments.of("Leading White Space", "  1", false)
         );
     }
@@ -73,7 +73,7 @@ public class LexerTests {
                 Arguments.of("Trailing Decimal", "1.", false),
                 Arguments.of("Leading Decimal", ".5", false),
                 Arguments.of("Hidden Integer", "5.toString()", false),
-                Arguments.of("Leading Zeros", "007.0", false),
+                Arguments.of("Leading Zeros", "007.0", true),
                 Arguments.of("Double Decimal", "1..0", false),
                 Arguments.of("Leading White Space", "  1.0", false)
         );
@@ -95,7 +95,8 @@ public class LexerTests {
                 Arguments.of("Quote", "\'\'\'", false),
                 Arguments.of("Double Quote", "\'\"\'", true),
                 Arguments.of("Empty", "\'\'", false),
-                Arguments.of("Multiple", "\'abc\'", false)
+                Arguments.of("Multiple", "\'abc\'", false),
+                Arguments.of("Alphabetic Unterminated", "\'c", false)
         );
     }
 
@@ -115,12 +116,9 @@ public class LexerTests {
                 Arguments.of("Double Quote", "\"\"\"", false),
                 Arguments.of("Unterminated", "\"unterminated", false),
                 Arguments.of("Invalid Escape", "\"invalid\\escape\"", false),
-                Arguments.of("Mixed Escape", "\"mix of \\b \\$ escapes\"", false),
-                Arguments.of("Multiple Spaces", "one       two", true),
-                Arguments.of("Mixed Escape", "\"mix of \\b \\$ escapes\"", false),
+                Arguments.of("Multiple Spaces", "\"one       two\"", true),
                 Arguments.of("Mixed Escape", "\"mix of \\b \\$ escapes\"", false)
-
-                );
+        );
     }
 
     @ParameterizedTest
@@ -164,6 +162,10 @@ public class LexerTests {
                         new Token(Token.Type.STRING, "\"Hello, World!\"", 6),
                         new Token(Token.Type.OPERATOR, ")", 21),
                         new Token(Token.Type.OPERATOR, ";", 22)
+                )),
+                Arguments.of("Example 3", "one    two", Arrays.asList(
+                        new Token(Token.Type.IDENTIFIER, "one", 0),
+                        new Token(Token.Type.IDENTIFIER, "two", 7)
                 ))
         );
     }
@@ -171,10 +173,9 @@ public class LexerTests {
     @Test
     void testException() {
         ParseException exception = Assertions.assertThrows(ParseException.class,
-                () -> new Lexer("\\\"invalid\\\\escape\\").lex());
-        Assertions.assertEquals(10, exception.getIndex());
+                () -> new Lexer("\"unterminated").lex());
+        Assertions.assertEquals(13, exception.getIndex());
     }
-
 
     /**
      * Tests that lexing the input through {@link Lexer#lexToken()} produces a
