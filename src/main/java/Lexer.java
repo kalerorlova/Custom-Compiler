@@ -1,4 +1,4 @@
-//package plc.project;
+package plc.project;
 
 import java.util.*;
 
@@ -32,8 +32,10 @@ public final class Lexer {
         //throw new UnsupportedOperationException(); //TODO - DONE
         List<Token> tokenList = new ArrayList<Token>();
         while (chars.has(0) ) {
-            if (!(match("\\s"))) {
-                tokenList.add(lexToken());
+            if (!match(" ")) {
+                if (!match("[\b\n\r\t]")) {
+                    tokenList.add(lexToken());
+                }
             }
             chars.skip();
         }
@@ -56,7 +58,7 @@ public final class Lexer {
         else if (peek("[+-]", "\\d") || peek( "\\d")) { //match doesn't read complex regex
             return lexNumber();
         }
-        else if (peek("\\'")) {
+        else if (peek("\'")) {
             return lexCharacter();
         }
         else if (peek("\"")) {
@@ -78,10 +80,7 @@ public final class Lexer {
 
     public Token lexNumber() {
         //throw new UnsupportedOperationException(); //TODO - DONE
-        if (match("[\\+-]", "0") || match("0")) {            //cases 0, +0, and -0
-            return chars.emit(Token.Type.INTEGER);
-        }
-        match("[\\+-]", "[1-9]");   //match until the period - two options since match can't complex regex
+        match("[\\+-]");
         while (match("\\d")) {
             continue;
         }
@@ -104,7 +103,7 @@ public final class Lexer {
             throw new ParseException("Missing Character", chars.index);
         }
         if (peek("[^\\n\\r]")) {
-            if (match("\\\\")) {    //if explicitly written escape seq
+            if (peek("\\\\")) {    //if explicitly written escape seq
                 lexEscape();
             }
             else {
@@ -113,6 +112,7 @@ public final class Lexer {
         }
         if (!match("\'")) {
             match(".");
+            //System.out.println("Incorrect char index is: " + chars.index);
             throw new ParseException("Unterminated or Multiple-Line Character", chars.index);
         }
         return chars.emit(Token.Type.CHARACTER);
@@ -125,7 +125,7 @@ public final class Lexer {
             throw new ParseException("Double Quote in the String", chars.index);
         }
         while (peek("[^\"\\n\\r]")) {
-            if (match("\\\\")) {
+            if (peek("\\\\")) {
                 lexEscape();
             }
             else {
@@ -141,10 +141,11 @@ public final class Lexer {
 
     public void lexEscape() {
         //throw new UnsupportedOperationException(); //TODO - DONE
-        if (match("[^bnrt\\\\]")) {
+        if (!match("\\\\", "[bnrt\\\\]")){
+            match(".");
+            //System.out.println("Incorrect char index is: " + chars.index + " " + chars.get(0));
             throw new ParseException("Invalid Escape Sequence", chars.index);
         }
-        match(".");
     }
 
     public Token lexOperator() {
