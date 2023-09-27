@@ -77,9 +77,11 @@ public final class Parser {
                 match(";");
                 return new Ast.Stmt.Assignment(expr, val);
             }
-            if (match(";")) {
+            else if (match(";")) {
                 return new Ast.Stmt.Expression(expr);
             }
+            else
+                throw new ParseException("Missing semicolon", tokens.get(-1).getIndex());
         }
         return null;
     }
@@ -265,7 +267,7 @@ public final class Parser {
      * functions. It may be helpful to break these up into other methods but is
      * not strictly necessary.
      */
-    public Ast.Expr parsePrimaryExpression() {
+    public Ast.Expr parsePrimaryExpression() throws ParseException {
         //throw new UnsupportedOperationException(); //TODO
         if (match("NIL")) {
             return new Ast.Expr.Literal(null);
@@ -330,7 +332,11 @@ public final class Parser {
                 if (!match(")")) {
                     args.add(parseExpression());
                     while (match(",")) {
-                        args.add(parseExpression());
+                        if (!match(")")) {
+                            args.add(parseExpression());
+                        } else {
+                            throw new ParseException("Trailing comma", tokens.index);
+                        }
                     }
                 }
                 match(")");
@@ -341,13 +347,10 @@ public final class Parser {
                 }
             }
             return new Ast.Expr.Access(Optional.empty(), name);
-
-
-
         }
-
-
-        return null;
+        else {
+            throw new ParseException("Invalid primary expression.", tokens.get(0).getIndex());
+        }
     }
 
     /**
