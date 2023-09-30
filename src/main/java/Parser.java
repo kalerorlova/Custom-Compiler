@@ -70,18 +70,35 @@ public final class Parser {
         else if (match("RETURN")) {
             parseReturnStatement();
         }
+        //I don't think we need to check if it's an invalid secondary expression because it goes into
+        //primary expression and catches if something is amiss.
+        //Is there a way to delete the duplicate code for missing semicolon for statement?
         else {
             Ast.Expr expr = parseExpression();
             if (match("=")) {
                 Ast.Expr val = parseExpression();
-                match(";");
+                if (!match(";")) {
+                    if (tokens.has(0)) {
+                        throw new ParseException("Missing semicolon", tokens.get(0).getIndex());
+                    }
+                    //the token is the final token
+                    else {
+                        throw new ParseException("Missing semicolon", tokens.get(-1).getIndex() + tokens.get(-1).getLiteral().length());
+                    }
+
+                }
                 return new Ast.Stmt.Assignment(expr, val);
             }
-            else if (match(";")) {
-                return new Ast.Stmt.Expression(expr);
+            else if (!match(";")) {
+                if (tokens.has(0)) {
+                    throw new ParseException("Missing semicolon", tokens.get(0).getIndex());
+                }
+                //the token is the final token
+                else {
+                    throw new ParseException("Missing semicolon", tokens.get(-1).getIndex() + tokens.get(-1).getLiteral().length());
+                }
             }
-            else
-                throw new ParseException("Missing semicolon", tokens.get(-1).getIndex());
+            return new Ast.Stmt.Expression(expr);
         }
         return null;
     }
@@ -234,24 +251,43 @@ public final class Parser {
         //note that this has the same structure as the last else section in the parsePrimaryExpression function
         while (match(".")) {
             if (match(Token.Type.IDENTIFIER)) {
-                name = tokens.get(-1).getLiteral();     //it's -1 because we've matched on the token
-                //if (), it's a function
-                if (match("(")) {
-                    List<Ast.Expr> args = new ArrayList<Ast.Expr>();
-                    if (!match(")")) {
+                name = tokens.get(-1).getLiteral();
+            }
+            else if (tokens.has(0)) {
+                throw new ParseException("No identifier", tokens.get(0).getIndex());
+            }
+            //the token is the final token and there is no paren
+            else {
+                throw new ParseException("No identifier", tokens.get(-1).getIndex() + tokens.get(-1).getLiteral().length());
+            }
+            //matched on identifier, check if it's a function or access
+            if (match("(")) {
+                //create an empty argument list for the function
+                List<Ast.Expr> args = new ArrayList<Ast.Expr>();
+                if (!match(")")) {
+                    args.add(parseExpression());
+                    while (match(",")) {
+                        if (match(")")) {
+                            throw new ParseException("Trailing comma",tokens.get(0).getIndex());
+                        }
                         args.add(parseExpression());
-                        while (match(",")) {
-                            args.add(parseExpression());
+                    }
+                    if (!match(")")) {
+                        if (tokens.has(0)) {
+                            throw new ParseException("No closing paren", tokens.get(0).getIndex());
+                        }
+                        //the token is the final token and there is no paren
+                        else {
+                            throw new ParseException("No closing paren", tokens.get(-1).getIndex() + tokens.get(-1).getLiteral().length());
                         }
                     }
-                    match(")");
-                    if (!peek(".")) {
-                        return new Ast.Expr.Function(Optional.of(left), name, args);
-                    }
-                    left = new Ast.Expr.Function(Optional.of(left), name, args);
                 }
+                if (!peek(".")) {
+                    return new Ast.Expr.Function(Optional.of(left), name, args);
+                }
+                left = new Ast.Expr.Function(Optional.of(left), name, args);
             }
-            //else, we're trying to access something
+            //access
             if (!peek(".")) {
                 return new Ast.Expr.Access(Optional.of(left), name);
             }
@@ -310,16 +346,18 @@ public final class Parser {
             return new Ast.Expr.Literal(str.substring(1, str.length()-1));
         }
         else if (match("(")) {
+            //System.out.println("the index before matching on group is " + Integer.toString(tokens.get(0).getIndex()));
             Ast.Expr.Group group = new Ast.Expr.Group(parseExpression());
             //here I attempted to implement the error-checking functionality
+            //System.out.println("the index before matching on paren is " + Integer.toString(tokens.get(0).getIndex()));
             if (!match(")")) {
-                if (tokens.has(1)) {    //if did not match on a paren, we're still on a correct token
-                    //we have to push forward if there is a token
-                    throw new ParseException("No closing paren", tokens.get(1).getIndex());
+                //something else instead of paren
+                if (tokens.has(0)) {
+                    throw new ParseException("No closing paren", tokens.get(0).getIndex());
                 }
                 //the token is the final token and there is no paren
                 else {
-                    throw new ParseException("No closing paren", tokens.get(0).getIndex() + tokens.get(0).getLiteral().length());
+                    throw new ParseException("No closing paren", tokens.get(-1).getIndex() + tokens.get(-1).getLiteral().length());
                 }
             };
             return group;
@@ -332,24 +370,31 @@ public final class Parser {
                 if (!match(")")) {
                     args.add(parseExpression());
                     while (match(",")) {
-                        if (!match(")")) {
-                            args.add(parseExpression());
-                        } else {
-                            throw new ParseException("Trailing comma", tokens.index);
+                        if (match(")")) {
+                            throw new ParseException("Trailing comma",tokens.get(0).getIndex());
+                        }
+                        args.add(parseExpression());
+                    }
+                    if (!match(")")) {
+                        if (tokens.has(0)) {
+                            throw new ParseException("No closing paren", tokens.get(0).getIndex());
+                        }
+                        //the token is the final token and there is no paren
+                        else {
+                            throw new ParseException("No closing paren", tokens.get(-1).getIndex() + tokens.get(-1).getLiteral().length());
                         }
                     }
                 }
-                match(")");
-                if (!peek(".")) {
-                    //try commenting out several lines here to see the error messages. I inspected error messages to
-                    //understand better how the Ast.Expr.Function and Access work
-                    return new Ast.Expr.Function(Optional.empty(), name, args);
-                }
+                return new Ast.Expr.Function(Optional.empty(), name, args);
             }
             return new Ast.Expr.Access(Optional.empty(), name);
         }
-        else {
+        else if (tokens.has(0)) {
             throw new ParseException("Invalid primary expression.", tokens.get(0).getIndex());
+        }
+        //it was a final token
+        else {
+            throw new ParseException("Invalid primary expression.", tokens.get(-1).getIndex() + tokens.get(-1).getLiteral().length());
         }
     }
 
