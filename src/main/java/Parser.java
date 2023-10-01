@@ -371,7 +371,7 @@ public final class Parser {
                     args.add(parseExpression());
                     while (match(",")) {
                         if (match(")")) {
-                            throw new ParseException("Trailing comma",tokens.get(0).getIndex());
+                            throw new ParseException("Trailing comma",tokens.get(-1).getIndex());
                         }
                         args.add(parseExpression());
                     }
